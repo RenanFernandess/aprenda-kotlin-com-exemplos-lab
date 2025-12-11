@@ -1,6 +1,6 @@
-package com.
+package com.desafio
 
-import data.models.Sexo
+import com.desafio.data.models.Sexo
 
 class Usuario (
     val nome: String,

@@ -1,6 +1,6 @@
-package data.models
+package com.desafio.data.models
 
-import kotlin.Usuario
+import com.desafio.Usuario
 
 data class Formacao(
     val nome: String,
@@ -21,16 +21,12 @@ data class Formacao(
         }
     }
 
-    fun matricularVarios(vararg usuarios: Usuario) {
-        if (_inscritos.addAll(usuarios)) {
-            val names: String = usuarios
-                .fold("") { acc, next -> acc + "${next.nome} ${next.sobreNome}, " }
-                .dropLast(2)
-            println("$names foram matriculados com sucesso!")
-        }
+    fun matricularVarios(vararg usuarios: Usuario): Boolean {
+        return _inscritos.addAll(usuarios)
     }
 
     fun listarConteudos (): List<String> = conteudos.map { it.nome }
 
-    fun listarInscritos (): List<String> = inscritos.map { "${it.nome} ${it.sobreNome}" }
+    fun listarInscritos (): String = inscritos
+        .foldIndexed("") { ind, acc, next -> acc + "    ${ind+1} - ${next.nome} ${next.sobreNome}\n"}
 }

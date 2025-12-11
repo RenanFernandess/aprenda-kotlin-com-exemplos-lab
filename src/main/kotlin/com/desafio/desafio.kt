@@ -1,30 +1,13 @@
-import data.Conteudos
-import data.models.Formacao
-import data.models.Nivel
-import data.models.Sexo
+package com.desafio
+
+import com.desafio.cli.InterfaceCLI
+import com.desafio.data.database.Formacoes
 
 fun main(args: Array<String>) {
-    val formacao: Formacao = Formacao(
-        nome = "Desenvolvimento Web",
-        nivel = Nivel.INTERMEDIARIO,
-        conteudos = Conteudos.desenvolvimentoWeb
-    )
+    val formacoes = Formacoes
+    formacoes.iniciar()
 
-    formacao.matricularVarios(
-        Usuario(
-            "João",
-            "Paulo",
-            28,
-            Sexo.MASCULINO
-        ),
-        Usuario(
-            "Maria",
-            "Luisa",
-            25,
-            Sexo.FEMININO
-        )
-    )
+    val interfaceCLI = InterfaceCLI(formacoes)
 
-    println("Lista de conteudos: ${formacao.listarConteudos()}")
-    println("Lista de instcritos: ${formacao.listarInscritos()}")
+    interfaceCLI.iniciar()
 }

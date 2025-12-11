@@ -1,4 +1,4 @@
-package data.models
+package com.desafio.data.models
 
 data class ConteudoEducacional(
     val nome: String,
