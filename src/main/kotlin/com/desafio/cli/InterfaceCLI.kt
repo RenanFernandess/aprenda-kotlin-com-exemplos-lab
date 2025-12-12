@@ -1,77 +1,143 @@
 package com.desafio.cli
 
-import com.desafio.Usuario
-import com.desafio.data.database.Formacoes
+import com.desafio.data.models.User
+import com.desafio.data.database.Courses
+import com.desafio.data.models.Sex
 
 class InterfaceCLI(
-    private val formacoes: Formacoes,
+    private val formations: Courses,
 ) {
 
-    fun iniciar() {
-        println("Bem vindo(a) ao nosso terminal de formações!")
-        println("Como posso te ajudar?")
-        println("   1 - Ver lista de formações \n   2 - Matricular em um curso \n   3 - Fazer login")
-        println("Digite o numero da opção desejada para prosseguir!")
-        val opcao: String = readln()
-
-//        while (opcao !in 1..3) {
-//            opcao = readln().toInt()
-//        }
-
-        when(opcao) {
-            "1" -> listarCursos()
-            "2" -> fazerMatricula()
-            "3" -> fazerLogin()
+    fun start() {
+        var close: Boolean = false
+        while (!close) {
+            println("Bem vindo(a) ao nosso terminal de formações! \n Como posso te ajudar?")
+            println("   1 - Ver lista de formações \n   2 - Matricular em um curso \n   Sair - Digite 'sair' para encerrar")
+            print("Digite o numero da opção desejada para prosseguir!\n--> ")
+            val option: String = getOption("1".."2")
+            when(option) {
+                "1" -> close = listCourses()
+                "2" -> ""
+                "sair" -> close = true
+            }
         }
     }
 
-    private fun listarCursos() {
-        println("---------Aqui esta nossa grade de cursos!---------")
-        val listaDeCursos = formacoes.data
-            .foldIndexed("") { ind, acc, next -> acc + "    ${ind+1} - ${next.nome}\n" }
+    private fun listCourses(): Boolean {
+        var close: Boolean = false
+        val numberOfCourses = formations.data.size.toString()
+        val coursesList = formations.listCourses()
+        while (!close) {
+            println("---------Aqui esta nossa grade de cursos!---------")
+            println(coursesList)
+            print("Digite o numero do curso para ver os detalhes ou digite 0 para voltar\n--> ")
+            when(val option: String = getOption("0"..numberOfCourses)) {
+                in "1"..numberOfCourses -> close = showCourseDetails(option.toInt()-1)
+                "0" -> close = true
+            }
+        }
+        return false
+    }
 
-        println(listaDeCursos)
-        println("Digite o numero do curso para ver os detalhes ou digite 0 para voltar")
-        val numeroDoCurso: Int = readln().toInt()
-        val index: Int = numeroDoCurso -1
+    private fun showCourseDetails(index: Int): Boolean {
+        var close: Boolean = false
+        val course = formations.data[index]
+        while (!close) {
+            course.run {
+                val title = "---------Detalhes do curso $title---------"
+                println(title)
+                println("Nível: $levelOfEducation\nConteúdos do curso:\n${listContents()}")
+                println("-".repeat(title.length))
+            }
+            println("Como você deseja prosseguir?")
+            println("   1 - Matricular no curso\n   2 - Ver lista de inscritos\n   3 - Voltar para lista de cursos\n   4 - Voltar para o inicio")
+            print("Digite o numero da opção desejada para prosseguir!\n--> ")
+            val option: String = getOption("1".."4")
+            when(option) {
+                "1" -> enroll(index)
+                "2" -> println("Lista de inscritos:\n${course.listEnrolled()}")
+                "3" -> close = true
+                "4" -> return true
+            }
+        }
+        return false
+    }
 
-        when(numeroDoCurso) {
-            in 1..formacoes.data.size -> verDetalhesDoCurso(index)
-            0 -> return
+    private fun enroll(index: Int) {
+        val course = formations.data[index]
+        println("Matricular no curso de ${course.title}")
+        println("Para realizar a matricula no curso preencha as informações a seguir:")
+        var user: User = collectUserData()
+        var isCorrect = checkUserData(user)
+        while (!isCorrect) {
+            println("Preencha os dados novamente:")
+            user = collectUserData()
+            isCorrect = checkUserData(user)
+        }
+
+        val isEnrolled: Boolean = course.enroll(user)
+        if (isEnrolled) {
+            user.run {
+                val message =
+                    if (sex == Sex.FEMININO) "matriculada com sucesso!"
+                    else "matriculado com sucesso!"
+                println("$name $lastName $message")
+            }
         }
     }
 
-    private fun verDetalhesDoCurso(index: Int) {
-        val curso = formacoes.data[index]
-        curso.run {
-            val conteudosDoCurso = conteudos
-                .foldIndexed("") { ind, acc, next -> acc + "    ${ind+1} - ${next.nome}: ${next.duracao}min\n"}
+    private fun collectUserData(): User {
+        print("Nome: ")
+        val firstName: String = readln()
+        print("Sobrenome: ")
+        val lastName: String = readln()
+        print("Idade: ")
+        val age: Int = getAge()
+        println("Sexo:\n   M - Masculino\n   F - Feminino")
+        val sex: Sex = getSex()
+        return User(firstName, lastName, age, sex)
+    }
 
-            println("---------Detalhes do curso $nome---------")
-            println("Nível: $nivel")
-            println("Conteúdos do curso:")
-            println(conteudosDoCurso)
+    fun checkUserData(user: User): Boolean {
+        println("Confira se as informações estão corretas!")
+        user.run {
+            println("   Nome: $name $lastName\n   Idade: $age\n   Sexo: ${sex.toString()}\n")
         }
-
         println("Como você deseja prosseguir?")
-        println("   1 - Matricular no curso\n   2 - Ver lista de inscritos\n    3 - Voltar para lista de cursos\n   4 - Voltar para o inicio")
+        println("   1 - Sim, continuar matricula\n   2 - Não, corrigir informações")
+        print("Digite o numero da opção desejada para prosseguir!\n--> ")
+        val option: String = getOption("1".."2", false)
+        return when(option) { "1" -> true; else -> false }
+    }
 
-        val opcao: String = readln()
-        println("Digite o numero da opção desejada para prosseguir!")
-
-        when(opcao) {
-            "1" -> fazerMatricula()
-            "2" -> listarInscritosDoCurso(curso.listarInscritos())
-            "3" -> return
-            "4" -> return
+    private fun getAge(): Int {
+        val regex = Regex("^[0-9]{2}$")
+        var age: String = readln()
+        while (!age.contains(regex)) {
+            print("$age não é uma idade valida! Digite uma idade entre 10 a 99 anos.\n--> ")
+            age = readln()
         }
+        return age.toInt()
     }
 
-    private fun listarInscritosDoCurso(inscritos: String) {
-        println("Lista de inscritos:")
-        println(inscritos)
+    private fun getSex(): Sex {
+        val regex = Regex("^[MmFf]$")
+        var sex: String = readln()
+        while (!sex.contains(regex)) {
+            print("$sex não é uma opção valida! Digite o carácter da opção desejada novamente.\n--> ")
+            sex = readln()
+        }
+        sex.lowercase()
+        return when(sex) {"f" -> Sex.FEMININO; else -> Sex.MASCULINO}
     }
 
-    private fun fazerMatricula() {}
-    private fun fazerLogin() {}
+    private fun getOption(range: ClosedRange<String>, exit: Boolean = true): String {
+        var option: String = readln().lowercase()
+        if (option == "sair" && exit) return option
+        while (option !in range) {
+            print("$option não é uma opção valida! Digite o numero da opção desejada novamente.\n--> ")
+            option = readln()
+        }
+        return option
+    }
 }

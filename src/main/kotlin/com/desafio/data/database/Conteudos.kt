@@ -1,13 +1,13 @@
 package com.desafio.data.database
 
-import com.desafio.data.models.ConteudoEducacional
+import com.desafio.data.models.EducationalContent
 
 object Conteudos {
-    val desenvolvimentoWeb: List<ConteudoEducacional> = listOf(
-        ConteudoEducacional("Fundamentos", 80),
-        ConteudoEducacional("Java-script"),
-        ConteudoEducacional("Front-end", 120),
-        ConteudoEducacional("Back-end", 120),
-        ConteudoEducacional("Ciencias da computação")
+    val desenvolvimentoWeb: List<EducationalContent> = listOf(
+        EducationalContent("Fundamentos", 80),
+        EducationalContent("Java-script"),
+        EducationalContent("Front-end", 120),
+        EducationalContent("Back-end", 120),
+        EducationalContent("Ciencias da computação")
     )
 }
